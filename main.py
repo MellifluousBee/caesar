@@ -15,11 +15,66 @@
 # limitations under the License.
 #
 import webapp2
+from caesar import encrypt
 
-class MainHandler(webapp2.RequestHandler):
+page_header = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Caesar</title>
+    <style type="text/css">
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+"""
+edit_header = "<h3>Tricky Sneakies</h3>"
+
+#a form for user input
+add_form = """
+<form action="/rotate" method="post">
+    <label>
+        I want to rotate my text by
+        <input type="number" name="rotation"/>
+        letters.
+    </label>
+    <br>
+    <textarea name="textbox" value=" "
+        style="height: 100px; width: 400px;">{0}</textarea>
+    <br>
+    <input type="submit" value="Go Go Gadget"/>
+</form>
+"""
+
+# html boilerplate for the bottom of every page
+page_footer = """
+</body>
+</html>
+"""
+class Index(webapp2.RequestHandler):
+
     def get(self):
-        self.response.write('Hello world!')
+        add_clear_form= add_form.format("")
+        response = page_header + edit_header + add_clear_form + page_footer
+        self.response.out.write(response)
+class EncryptText(Index):
+
+
+    def post(self):
+        # look inside the request to figure out what the user typed
+        user_text = self.request.get("textbox")
+        user_rotation=int(self.request.get("rotation"))
+        ciphered_text= encrypt(user_text, user_rotation)
+        self.response.out.write(edit_header + add_form.format(ciphered_text))
+
+
+
 
 app = webapp2.WSGIApplication([
-    ('/', MainHandler)
+    ('/', Index),
+    ('/rotate', EncryptText)
+
 ], debug=True)
